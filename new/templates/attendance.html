@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        nav ul li a:hover {
+            background-color: #575757;
+        }
+
+        /* Main Content */
+        main {
+            width: 80%;
+            margin: 30px auto;
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            font-size: 16px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Attendance Status */
+        .present {
+            background-color: lightgreen;
+            color: black;
+            font-weight: bold;
+        }
+
+        .absent {
+            background-color: lightcoral;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Attendance Records</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('login') }}">Logout</a></li>
+                <li><a href="/welcome">Home</a></li>
+                <li><a href="{{ url_for('mark_attendance') }}">Mark Attendance</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h2>Attendance List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Date/Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record[0] }}</td>
+                    <td class="{% if record[1] == 'Present' %}present{% else %}absent{% endif %}">
+                        {{ record[1] }}
+                    </td>
+                    <td>{{ record[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        // Automatically set status to 'Absent' if more than 24 hours have passed
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.querySelectorAll('tbody tr');
+            const currentTime = new Date();
+
+            rows.forEach(row => {
+                const attendanceTimeCell = row.cells[2]; // Date/Time cell
+                const statusCell = row.cells[1]; // Status cell
+
+                const attendanceTime = new Date(attendanceTimeCell.innerText);
+                const timeDifference = currentTime - attendanceTime;
+
+                if (timeDifference > 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+                    statusCell.classList.remove('present');
+                    statusCell.classList.add('absent');
+                    statusCell.innerText = 'Absent'; // Update status to 'Absent' after 24 hours
+                }
+            });
+        });
+    </script>
+</body>
+</html>
