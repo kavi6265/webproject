@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Leave Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f9fa;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 90%;
+            margin: auto;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #f1f1f1;
+        }
+        .approved { color: green; }
+        .rejected { color: red; }
+        .pending { color: orange; }
+        form {
+            display: inline;
+        }
+        button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+        }
+        .approve { background-color: #28a745; }
+        .reject { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h2>Teacher Leave Approval Panel</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <table>
+        <tr>
+            <th>Student</th>
+            <th>Email</th>
+            <th>Leave Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for leave in leaves %}
+        <tr>
+            <td>{{ leave.username }}</td>
+            <td>{{ leave.email }}</td>
+            <td>{{ leave.leave_date }}</td>
+            <td>{{ leave.reason }}</td>
+            <td class="{{ leave.status|lower }}">{{ leave.status }}</td>
+            <td>
+                {% if leave.status == 'Pending' %}
+                <form method="post">
+                    <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                    <button type="submit" name="action" value="approve" class="approve">Approve</button>
+                    <button type="submit" name="action" value="reject" class="reject">Reject</button>
+                </form>
+                {% else %}
+                No action
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

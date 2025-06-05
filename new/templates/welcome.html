@@ -1,114 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
 
-    <style>
-        /* styles.css */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        /* Sidebar styles */
-        .sidebar {
-            width: 250px;
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            position: fixed;
-            height: 100%;
-        }
-
-        .sidebar h2 {
-            text-align: center;
-            margin-top: 0;
-        }
-
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            display: block;
-            margin: 10px 0;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .sidebar a:hover {
-            background-color: #444;
-        }
-
-        /* Main content area */
-        .content {
-            margin-left: 270px; /* To leave space for the sidebar */
-            padding: 20px;
-            width: calc(100% - 270px);
-        }
-
-        .dashboard-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        .logout-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .logout-btn:hover {
-            background-color: #d32f2f;
-        }
-
-        p {
-            font-size: 16px;
-            color: #555;
-        }
-    </style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      position: fixed;
+      height: 100%;
+    }
+    .sidebar h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      display: block;
+      margin: 10px 0;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .sidebar a:hover {
+      background-color: #444;
+    }
+    .content {
+      margin-left: 270px;
+      padding: 20px;
+      width: calc(100% - 270px);
+    }
+    .dashboard-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto 40px auto;
+    }
+    h2 {
+      margin-top: 0;
+      text-align: center;
+      color: #2566cf;
+    }
+    .logout-btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #d32f2f;
+    }
+    p {
+      font-size: 16px;
+      color: #555;
+    }
+    canvas {
+      max-width: 100%;
+    }
+    .no-data-msg {
+      color: #888;
+      font-style: italic;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>Dashboard</h2>
-        <a href="/profile">Profile</a>
-        <a href="{{ url_for('register_face') }}">Register Your Face</a>
-        <a href="{{ url_for('mark_attendance') }}">Mark Attendance</a>
-        <a href="{{ url_for('view_attendance') }}">View Attendance</a>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="/profile">Profile</a>
+    <a href="{{ url_for('register_face') }}">Register Your Face</a>
+    <a href="{{ url_for('mark_attendance') }}">Mark Attendance</a>
+    <a href="{{ url_for('view_attendance') }}">View Attendance</a>
+    <a href="{{ url_for('attendance_history') }}">Attendance History</a>
+    <a href="/request_leave">Requesting Leave</a>
+    <a href="/logout">Logout</a>
+  </div>
 
-        <a href="/logout">Logout</a>
+  <!-- Main Content -->
+  <div class="content">
+    <h2>Dashboard</h2>
+
+    <div class="dashboard-container">
+      <p>You have successfully logged in. Your email is: {{ session['email'] }}.</p>
+      <a href="/logout"><button class="logout-btn">Logout</button></a>
     </div>
 
-    <!-- Main Content -->
-    <div class="content">
-        <div class="dashboard-container">
-            <!-- Welcome message with the user's name and email -->
-            <h2>Welcome, {{ session['username'] }}!</h2>
-            <p>You have successfully logged in. Your email is: {{ session['email'] }}.</p>
-            
-            <!-- Logout button -->
-            <a href="/logout"><button class="logout-btn">Logout</button></a>
-        </div>
+    <div class="dashboard-container">
+      <h2>Attendance Over Time</h2>
+
+      {% if not dates or dates|length == 0 %}
+        <p class="no-data-msg"> Please mark attendance first for Today.</p>
+      {% else %}
+        <canvas id="lineChart" width="800" height="400"></canvas>
+      {% endif %}
     </div>
+  </div>
+
+  <!-- Chart Data -->
+  <script id="chart-data" type="application/json">
+    {
+      "dates": {{ dates | default([]) | tojson | safe }},
+      "presentCounts": {{ present_counts | default([]) | tojson | safe }},
+      "absentCounts": {{ absent_counts | default([]) | tojson | safe }}
+    }
+  </script>
+
+  {% if dates and dates|length > 0 %}
+  <!-- Chart Script -->
+  <script>
+    const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+    const dates = chartData.dates;
+    const presentCounts = chartData.presentCounts;
+    const absentCounts = chartData.absentCounts;
+
+    const ctx = document.getElementById('lineChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'Present',
+            data: presentCounts,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#2563eb',
+            borderWidth: 2
+          },
+          {
+            label: 'Absent',
+            data: absentCounts,
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#dc2626',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              color: '#334155',
+              font: {
+                size: 14
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Date',
+              color: '#475569',
+              font: {
+                size: 14
+              }
+            },
+            ticks: {
+              color: '#64748b'
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Number of Students',
+              color: '#475569',
+              font: {
+                size: 14
+              }
+            },
+            ticks: {
+              color: '#64748b'
+            },
+            grid: {
+              color: '#e2e8f0'
+            }
+          }
+        }
+      }
+    });
+  </script>
+  {% endif %}
 
 </body>
 </html>

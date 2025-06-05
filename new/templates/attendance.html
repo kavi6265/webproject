@@ -2,32 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Records</title>
+    
     <style>
-        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
             margin: 0;
             padding: 0;
         }
 
-        /* Header */
         header {
-            background-color: #333;
+            background-color: #4CAF50;
+            padding: 20px 0;
             color: white;
-            padding: 15px 0;
             text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 28px;
         }
 
         nav ul {
-            list-style: none;
+            list-style-type: none;
             padding: 0;
             margin: 10px 0 0;
             display: flex;
@@ -35,126 +34,135 @@
             gap: 20px;
         }
 
-        nav ul li {
-            display: inline;
-        }
-
         nav ul li a {
             color: white;
             text-decoration: none;
-            font-size: 18px;
-            padding: 8px 15px;
+            padding: 8px 16px;
+            background-color: #388E3C;
             border-radius: 5px;
+            transition: background-color 0.3s;
         }
 
         nav ul li a:hover {
-            background-color: #575757;
+            background-color: #2e7d32;
         }
 
-        /* Main Content */
-        main {
-            width: 80%;
-            margin: 30px auto;
+        h2 {
             text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            color: #333;
         }
 
-        /* Table */
         table {
-            width: 100%;
+            width: 90%;
+            margin: 30px auto;
             border-collapse: collapse;
-            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background-color: #4CAF50;
+            color: white;
         }
 
         th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
+            padding: 14px 16px;
             text-align: center;
+            border-bottom: 1px solid #ddd;
+            font-size: 15px;
         }
 
-        th {
-            background-color: #333;
-            color: white;
-            font-size: 16px;
+        tbody tr:hover {
+            background-color: #f1f1f1;
         }
 
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        /* Attendance Status */
-        .present {
-            background-color: lightgreen;
-            color: black;
+        td:nth-child(4) {
             font-weight: bold;
+            color: #007bff;
+        }
+
+        .present {
+            font-weight: bold;
+            color: #4CAF50;
         }
 
         .absent {
-            background-color: lightcoral;
-            color: white;
             font-weight: bold;
+            color: red;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0; /* Square shape */
+            border: 2px solid #ccc; /* Frame effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
+        }
+
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Attendance Records</h1>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('login') }}">Logout</a></li>
-                <li><a href="/welcome">Home</a></li>
-                <li><a href="{{ url_for('mark_attendance') }}">Mark Attendance</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <h2>Attendance List</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th>Date/Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in records %}
-                <tr>
-                    <td>{{ record[0] }}</td>
-                    <td class="{% if record[1] == 'Present' %}present{% else %}absent{% endif %}">
-                        {{ record[1] }}
-                    </td>
-                    <td>{{ record[2] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
 
-    <script>
-        // Automatically set status to 'Absent' if more than 24 hours have passed
-        document.addEventListener('DOMContentLoaded', function () {
-            const rows = document.querySelectorAll('tbody tr');
-            const currentTime = new Date();
+<header>
+    <h1>Today Attendance Records</h1>
+    <nav>
+        <ul>
+            <li><a href="/welcome">Home</a></li>
+            <li><a href="{{ url_for('mark_attendance') }}">Mark Attendance</a></li>
+        </ul>
+    </nav>
+</header>
 
-            rows.forEach(row => {
-                const attendanceTimeCell = row.cells[2]; // Date/Time cell
-                const statusCell = row.cells[1]; // Status cell
+<h2>Attendance Records</h2>
 
-                const attendanceTime = new Date(attendanceTimeCell.innerText);
-                const timeDifference = currentTime - attendanceTime;
 
-                if (timeDifference > 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
-                    statusCell.classList.remove('present');
-                    statusCell.classList.add('absent');
-                    statusCell.innerText = 'Absent'; // Update status to 'Absent' after 24 hours
-                }
-            });
-        });
-    </script>
+<table>
+    <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Attendance Time</th>
+            <th>Attendance %</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for name, status, time, percentage, image_path in records %}
+        <tr>
+            <td>
+                {% if image_path %}
+                    <img src="{{ image_path }}"  width="100" height="100">
+                {% else %}
+                    N/A
+                {% endif %}
+            </td>
+            <td>{{ name }}</td>
+            <td class="{{ 'present' if status == 'Present' else 'absent' }}">{{ status }}</td>
+            <td>{{ time }}</td>
+            <td>{{ percentage }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 </body>
 </html>

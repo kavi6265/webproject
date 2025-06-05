@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Leave Request {{ status }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #ddd;">
+        <h2 style="color: #4CAF50;">Leave Request {{ status }}</h2>
+        <p>Hello,</p>
+        <p>Your leave request for <strong>{{ leave_date }}</strong> has been 
+        <strong >{{ status.lower() }}</strong>.</p>
+        <p>Attendance has been marked as: <strong>{{ attendance_status }}</strong>.</p>
+        <br>
+        <p>Regards,</p>
+        <p><em>Class Management System</em></p>
+    </div>
+</body>
+</html>
